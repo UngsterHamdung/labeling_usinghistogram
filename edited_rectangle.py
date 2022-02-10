@@ -24,7 +24,7 @@ def imwrite(filename, img, params=None):
 
 
 base_dir = "D:\\croped"
-save_dir = "D:\\real_crop"
+save_dir = "D:\\before_affine_crop"
 img_list = os.listdir(base_dir)
 count = 0
 
@@ -53,23 +53,22 @@ for img in img_list:
     horizontal_hist = real_src.shape[1] - np.sum(real_src, axis=1,keepdims=True)/255
     hist_minmax = MinMaxScaler()
     horizontal_hist = horizontal_hist.reshape(-1, 1)
-    print("hor", horizontal_hist)
+    # print("hor", horizontal_hist)
     hist_minmax.fit(horizontal_hist)
     hist_scaled = hist_minmax.fit_transform(horizontal_hist)
     hist_scaled = hist_scaled * 10
     hist_scaled = hist_scaled//2 *2
     hist_mean_val = np.mean(hist_scaled)
 
-    # plt.plot(hist_scaled)
-    # plt.show()
+  
     hist_length = len(hist_scaled) 
-    print(hist_length)
+    # print(hist_length)
 
     hist_index = []
 
     for i in range(hist_length):
-        if hist_length * 0.1 < i < hist_length * 0.9:
-            if hist_scaled[i] > hist_mean_val:
+        if hist_length * 0.2 < i < hist_length * 0.7:
+            if hist_scaled[i] > 0:
                 hist_index.append(i)
     for i in range(length):
         if length * 0.1 < i <length * 0.9:
@@ -104,17 +103,26 @@ for img in img_list:
         # print(test)
         # print(real_score)
         if real_score == 7:
-            count += 1
             for i in range(len(error_list)):
                 if i == len(error_list) - 1:
                     pass
-                else :
+                elif len(hist_index) > 0.4*h:
                     rect_img = cv2.rectangle(real_src, (int(scaled_index[error_list[i]] - w*0.02), hist_index[0]), (int(scaled_index[error_list[i+1]-1] + w*0.02), hist_index[-1]), (0, 0, 255), 1)
+                elif len(hist_index):
+                    rect_img = cv2.rectangle(real_src, (int(scaled_index[error_list[i]] - w*0.02), int(0.2*h)), (int(scaled_index[error_list[i+1]-1] + w*0.02), int(0.8*h)), (0, 0, 255), 1)
             # real_path = os.path.join(save_dir, img)
             # imwrite(real_path, rect_img, params=None)
-            
-            cv2.imshow("rect", rect_img)
-            cv2.waitKey(0)
+            if len(hist_index):
+                count += 1
+                real_path = os.path.join(save_dir, img)
+                imwrite(real_path, rect_img, params=None)
+                # print("현재 이미지는", str(img))
+                # print("현재 y축 높이는",str(hist_index))
+                # plt.plot(hist_scaled)
+                # plt.show()
+                # cv2.imshow("rect", rect_img)
+                # cv2.waitKey(0)
+                # print("\n")
     else:
         pass
 print("쓸만한 이미지는 ", str(count))
