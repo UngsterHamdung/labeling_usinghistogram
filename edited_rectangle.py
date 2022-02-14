@@ -23,7 +23,7 @@ def imwrite(filename, img, params=None):
         return False
 
 
-base_dir = "D:\\croped"
+base_dir = "D:\\tilting_img_train"
 save_dir = "D:\\before_affine_crop"
 img_list = os.listdir(base_dir)
 count = 0
@@ -33,8 +33,10 @@ for img in img_list:
     path_img = os.path.join(base_dir, img)
     src_array = np.fromfile(path_img, np.uint8)
     real_src = cv2.imdecode(src_array, cv2.COLOR_BGR2GRAY)
+    gray_src = cv2.cvtColor(real_src,cv2.COLOR_BGR2GRAY)
     # src = cv2.imread(path_img,cv2.IMREAD_COLOR)
-    h, w = real_src.shape
+    h, w, c= real_src.shape
+    ret,real_src = cv2.threshold(gray_src, 100 ,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
     vertical_hist = real_src.shape[0] - np.sum(real_src, axis=0, keepdims = True)/255
     minmax_scaler = MinMaxScaler()
     vertical_hist = vertical_hist.reshape(-1,1)
@@ -114,14 +116,14 @@ for img in img_list:
             # imwrite(real_path, rect_img, params=None)
             if len(hist_index):
                 count += 1
-                real_path = os.path.join(save_dir, img)
-                imwrite(real_path, rect_img, params=None)
+                # real_path = os.path.join(save_dir, img)
+                # imwrite(real_path, rect_img, params=None)
                 # print("현재 이미지는", str(img))
                 # print("현재 y축 높이는",str(hist_index))
                 # plt.plot(hist_scaled)
                 # plt.show()
-                # cv2.imshow("rect", rect_img)
-                # cv2.waitKey(0)
+                cv2.imshow("rect", rect_img)
+                cv2.waitKey(0)
                 # print("\n")
     else:
         pass
